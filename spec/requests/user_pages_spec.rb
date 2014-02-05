@@ -17,13 +17,19 @@ describe "User pages" do
     before do
       sign_in user
       visit edit_user_path(user)
-    end#before
+    end
 
     describe "page" do
       it { should have_selector('h1',    text: "Update your profile") }
       it { should have_selector('title', text: "Edit user") }
       it { should have_link('change', href: 'http://gravatar.com/emails') }
     end#page
+
+    describe "with invalid information" do
+      before { click_button "Save changes" }
+
+      it { should have_content('error') }
+    end
 
    describe "with valid information" do
       let(:new_name)  { "New Name" }
@@ -34,14 +40,14 @@ describe "User pages" do
         fill_in "Password",         with: user.password
         fill_in "Confirm Password", with: user.password
         click_button "Save changes"
-      end#with valid information
+      end#before
 
       it { should have_selector('title', text: new_name) }
       it { should have_selector('div.alert.alert-success') }
       it { should have_link('Sign out', href: signout_path) }
       specify { user.reload.name.should  == new_name }
       specify { user.reload.email.should == new_email }
-    end#with invalid information
+    end#with valid information
   end#edit
 
 
