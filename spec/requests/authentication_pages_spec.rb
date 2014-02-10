@@ -43,9 +43,9 @@ describe "Authentication" do
           describe "followed by signout" do
                before { click_link "Sign out" }
                it { should have_link('Sign in') }
-          end
-    	end
-  	end
+          end#followed*
+    	end#with valid*
+  end#signin
      describe "authorization" do
 
           describe "for non-signed-in users" do
@@ -86,5 +86,18 @@ describe "Authentication" do
                     end#visiting
                end#in the users
           end#for non-signed
+
+
+          describe "as non-admin user" do
+            let(:user) { FactoryGirl.create(:user) }
+            let(:non_admin) { FactoryGirl.create(:user) }
+
+            before { sign_in non_admin }
+
+            describe "submitting a DELETE request to the Users#destroy action" do
+              before { delete user_path(user) }
+              specify { response.should redirect_to(root_url) }
+            end#submitting...
+          end#as non-admin user
      end#authorization
 end#Authentication
