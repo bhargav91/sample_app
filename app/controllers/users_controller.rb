@@ -33,7 +33,7 @@ class UsersController < ApplicationController
     redirect_to users_url
   end
 
-  def edit
+  def edit    
   end
 
   def update
