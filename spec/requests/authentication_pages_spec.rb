@@ -46,12 +46,14 @@ describe "Authentication" do
           end#followed*
     	end#with valid*
   end#signin
+
+  
      describe "authorization" do
 
           describe "for non-signed-in users" do
                let(:user) { FactoryGirl.create(:user) }
 
-               describe "when attempting to visit a protected page" do
+                describe "when attempting to visit a protected page" do
                   before do
                   visit edit_user_path(user)
                   fill_in "Email",    with: user.email
@@ -62,10 +64,26 @@ describe "Authentication" do
                   describe "after signing in" do
 
                     it "should render the desired protected page" do
-                    page.should have_selector('title', text: 'Edit user')
+                      page.should have_selector('title', text: 'Edit user')
                     end#should
-                  end#afer
-                end#when
+
+                    describe "when signing in again" do
+                        before do
+                          delete signout_path
+                          visit signin_path
+                          fill_in "Email",    with: user.email
+                          fill_in "Password", with: user.password
+                          click_button "Sign in"
+                        end#before
+
+                        it "should render the default (profile) page" do
+                          page.should have_selector('title', text: user.name)
+                        end#should render the default*
+                    end#when signing in again*
+
+                  end#after signing in*
+                end#when attempting to visit
+
 
 
                describe "in the Users controller" do

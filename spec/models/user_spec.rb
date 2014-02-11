@@ -17,7 +17,7 @@ describe User do
    @user = User.new(name: "Example User", email: "user@example.com",
                    password: "foobar", password_confirmation: "foobar")
    
-  end
+  end#before
 
   subject { @user }
 
@@ -43,7 +43,7 @@ describe User do
     before do
       @user.save!
       @user.toggle!(:admin)
-    end
+    end#before
 
     it { should be_admin }
   end#with admin...
@@ -51,12 +51,12 @@ describe User do
   describe "remember token" do
     before { @user.save }
     its(:remember_token) { should_not be_blank }
-  end
+  end#remember*
 
   describe "when name is not present" do
     before { @user.name = "a" * 51 }
     it { should_not be_valid }
-  end
+  end#when name*
 
 
   describe "when email format is invalid" do
@@ -66,9 +66,9 @@ describe User do
       addresses.each do |invalid_address|
         @user.email = invalid_address
         @user.should_not be_valid
-      end
-    end
-  end
+      end#addresses.each
+    end#should be*
+  end#when email*
 
 
   describe "when email format is valid" do
@@ -77,40 +77,40 @@ describe User do
       addresses.each do |valid_address|
         @user.email = valid_address
         @user.should be_valid
-      end
-    end
-  end
+      end#addresses*
+    end#should*
+  end#when email*
 
   describe "when email address is already taken" do
     before do
       user_with_same_email = @user.dup
       user_with_same_email.email = @user.email.upcase
       user_with_same_email.save
-    end
+    end#before
 
     it { should_not be_valid }
-  end
+  end#when email*
 
   describe "when password is not present" do
   	before { @user.password = @user.password_confirmation = " " }
   	it { should_not be_valid }
-  end 
+  end#when password* 
 
   describe "when password doesn't match confirmation" do
   	before { @user.password_confirmation = "mismatch" }
   	it { should_not be_valid }
-  end
+  end#when password*
 
   describe "when password confirmation is nil" do
  	before { @user.password_confirmation = nil }
   	it { should_not be_valid }
-  end
+  end#when password
 
 
   describe "with a password that's too short" do
   	before { @user.password = @user.password_confirmation = "a" * 5 }
   	it { should be_invalid }
-  end
+  end#with a password*
 
   describe "return value of authenticate method" do
     before { @user.save }
@@ -118,13 +118,40 @@ describe User do
 
     describe "with valid password" do
       it { should == found_user.authenticate(@user.password) }
-    end
+    end#with valid*
 
     describe "with invalid password" do
       let(:user_for_invalid_password) { found_user.authenticate("invalid") }
 
       it { should_not == user_for_invalid_password }
       specify { user_for_invalid_password.should be_false }
-    end
-  end
-end
+    end#with invalid*
+  end#return value*
+
+  describe "micropost associations" do
+
+    before { @user.save }
+    let!(:older_micropost) do 
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.day.ago)
+    end#let!
+    let!(:newer_micropost) do
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.hour.ago)
+    end#let!
+
+
+    it "should have the right microposts in the right order" do
+      @user.microposts.should == [newer_micropost, older_micropost]
+    end#should have*
+
+
+    it "should destroy associated microposts" do
+      microposts = @user.microposts.dup
+      @user.destroy
+      microposts.should_not be_empty
+      microposts.each do |micropost|
+        Micropost.find_by_id(micropost.id).should be_nil
+      end
+    end#should destroy
+  end#micropost*
+
+end#describe User
